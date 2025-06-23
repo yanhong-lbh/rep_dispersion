@@ -1,0 +1,13 @@
+torch>=1.10.0
+transformers>=4.32.0
+datasets>=2.10.0
+tqdm>=4.64.0
+numpy>=1.21.0
+matplotlib>=3.4.0
+scipy>=1.8.0
+
+# Optional: for LoRA/adapters, if used (e.g., PEFT)
+peft>=0.6.0
+
+# Optional: for advanced tokenization
+sentencepiece>=0.1.99
