@@ -42,14 +42,11 @@ def calculate_token_probabilities(sentence, tokenizer, model, model_name, chunk_
     selected_hidden_states = hidden_output.hidden_states[layer_idx].to('cpu').float().numpy()
     return selected_hidden_states, ppl
 
-def sample_chunks(tokenized, chunk_len, n_chunks, random_sample=False, random_seed=42):
-    if random_sample:
-        total_chunks = len(tokenized) // chunk_len
-        random.seed(random_seed)
-        sampled_indices = random.sample(range(total_chunks), n_chunks)
-        chunks = [tokenized[i * chunk_len:(i + 1) * chunk_len] for i in sampled_indices]
-    else:
-        chunks = [tokenized[i:i + chunk_len] for i in range(0, n_chunks * chunk_len, chunk_len)]
+def sample_chunks(tokenized, chunk_len, n_chunks, random_seed=42):
+    total_chunks = len(tokenized) // chunk_len
+    random.seed(random_seed)
+    sampled_indices = random.sample(range(total_chunks), n_chunks)
+    chunks = [tokenized[i * chunk_len:(i + 1) * chunk_len] for i in sampled_indices]
     return chunks
 
 lora_path_dict = {
@@ -67,7 +64,6 @@ def main():
     model_name = config.model_name
     chunk_len = config.chunk_len
     n_chunks = config.n_chunks
-    random_sample = config.random_sample
     random_seed = config.random_seed
     ppl_only = config.ppl_only
     k = config.k
@@ -165,18 +161,12 @@ def main():
         if len(all_chunks) <= n_chunks:
             chunks = all_chunks
         else:
-            if random_sample:
-                random.seed(random_seed)
-                sampled_indices = random.sample(range(len(all_chunks)), n_chunks)
-                chunks = [all_chunks[i] for i in sampled_indices]
-            else:
-                chunks = all_chunks[:n_chunks]
+            random.seed(random_seed)
+            sampled_indices = random.sample(range(len(all_chunks)), n_chunks)
+            chunks = [all_chunks[i] for i in sampled_indices]
 
-    prefix = f"{data_dir}/{dataset_name}_{model_name}_{chunk_len}"
+    prefix = f"{data_dir}/{dataset_name}_{model_name}_{chunk_len}_{n_chunks}_random_{random_seed}"
 
-    if random_sample:
-        prefix += f"_{n_chunks}_random_{random_seed}"
-    
     if use_lora_finetuned_model:
         prefix += f"_lora_ft_{ft_dataset}"
     elif use_full_finetuned_model:
